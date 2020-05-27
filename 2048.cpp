@@ -482,11 +482,14 @@ public:
 		// TODO
         float error =  u - estimate(b);
         float delta = 0.025*error;
-        
-        return 1;
+        float value =0;
+       
 		for(int i=0;i<8;i++){
-			weight[ indexof(isomorphic[i],b) ]+=delta ;
+			weight[ indexof(isomorphic[i],b) ]+=(delta/8) ;
+			value+=(delta/8) ;
 		}
+		
+		return value;
 	}
 
 	/**
@@ -703,14 +706,11 @@ public:
 	state select_best_move(const board& b) const {
 		state after[4] = { 0, 1, 2, 3 }; // up, right, down, left
 		state* best = after;
-		int bestReward=0;
 		for (state* move = after; move != after + 4; move++) {
 			if (move->assign(b)) {
-				
-				if (move->value()+estimate(move->after_state()) > bestReward)
-			    	best = move;
-				    bestReward = move->value()+estimate(move->after_state()) ;
-					
+				move->set_value(move->reward() + estimate(move->after_state()));
+				if (move->value() > best->value())
+					best = move;
 			} else {
 				move->set_value(-std::numeric_limits<float>::max());
 			}
